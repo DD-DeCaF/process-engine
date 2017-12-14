@@ -1,0 +1,2 @@
+resolwe==5.1.0
+resolwe-bio==6.1.0a2
