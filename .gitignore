@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+*.pyc
+*.pyo
+**/__pycache__/
+.coverage
+.DS_Store
+.ipynb_checkpoints/
+.cache/
+venv/

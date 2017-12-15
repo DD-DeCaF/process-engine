@@ -22,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#j2)4zppv#a@)6$rvgb#wn#k@a6fc_fa@2dsr9*^vznj!0qmzd'
+SECRET_KEY = os.environ['RESOLWE_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ['RESOLWE_DJANGO_DEBUG'])
 
 
 INSTALLED_APPS = (
@@ -128,27 +128,22 @@ AUTHENTICATION_BACKENDS = (
 
 ANONYMOUS_USER_ID = -1
 
-# Check if PostgreSQL settings are set via environment variables
-pgname = os.environ.get('RESOLWE_POSTGRESQL_NAME', 'resolwe-bio')
-pguser = os.environ.get('RESOLWE_POSTGRESQL_USER', 'resolwe')
-pghost = os.environ.get('RESOLWE_POSTGRESQL_HOST', 'localhost')
-pgport = int(os.environ.get('RESOLWE_POSTGRESQL_PORT', 55433))
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': pgname,
-        'USER': pguser,
-        'HOST': pghost,
-        'PORT': pgport,
+        'NAME': os.environ['RESOLWE_POSTGRESQL_NAME'],
+        'USER': os.environ['RESOLWE_POSTGRESQL_USER'],
+        'HOST': os.environ['RESOLWE_POSTGRESQL_HOST'],
+        'PORT': os.environ['RESOLWE_POSTGRESQL_PORT'],
     }
 }
 
 
 REDIS_CONNECTION = {
-    'host': 'localhost',
-    'port': int(os.environ.get('RESOLWE_REDIS_PORT', 56380)),
-    'db': int(os.environ.get('RESOLWE_REDIS_DATABASE', 0)),
+    'host': os.environ['RESOLWE_REDIS_HOST'],
+    'port': int(os.environ['RESOLWE_REDIS_PORT']),
+    'db': int(os.environ['RESOLWE_REDIS_DB']),
 }
 
 FLOW_EXECUTOR = {
@@ -247,8 +242,8 @@ if os.environ.get('RESOLWEBIO_TESTS_SKIP_DOCKER_FAILURES', '').lower() in ["no",
 
 # Elastic Search.
 
-ELASTICSEARCH_HOST = os.environ.get('RESOLWE_ES_HOST', 'localhost')
-ELASTICSEARCH_PORT = int(os.environ.get('RESOLWE_ES_PORT', '59201'))
+ELASTICSEARCH_HOST = os.environ['RESOLWE_ES_HOST']
+ELASTICSEARCH_PORT = int(os.environ['RESOLWE_ES_PORT'])
 
 # Testing.
 

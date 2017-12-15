@@ -1,2 +1,3 @@
 resolwe==5.1.0
-resolwe-bio==6.1.0a2
+git+https://github.com/dd-decaf/resolwe-bio.git@pathway-predictor
+gunicorn==19.7.1
