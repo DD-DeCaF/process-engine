@@ -30,6 +30,12 @@ services:
       - RESOLWE_ES_HOST=${RESOLWE_ES_HOST:-elasticsearch}
       - RESOLWE_ES_PORT=${RESOLWE_ES_PORT:-9200}
       - RESOLWE_SECRET_KEY=${RESOLWE_SECRET_KEY:-1}
+      - SUPERUSER_USERNAME=${SUPERUSER_USERNAME:-admin}
+      - SUPERUSER_EMAIL=${SUPERUSER_EMAIL:-admin@test.com}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-admin1test}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
   postgresql:
     image: postgres:9.4
     environment:

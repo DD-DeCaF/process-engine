@@ -49,6 +49,8 @@ INSTALLED_APPS = (
 
     'resolwe_bio',
     'resolwe_bio.kb',
+
+    'modeling'
 )
 
 MIDDLEWARE = [
