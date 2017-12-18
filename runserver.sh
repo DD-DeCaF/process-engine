@@ -1,4 +1,5 @@
 #!/bin/sh
+python manage.py collectstatic &&
 python manage.py migrate && \
 python manage.py createsuperuser_password --username $SUPERUSER_USERNAME --email $SUPERUSER_USERNAME --password $SUPERUSER_PASSWORD --preserve && \
 python manage.py register && \

@@ -15,7 +15,9 @@ Including another URLconf
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 from django.contrib import admin
+from django.conf import settings
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 
 from rest_framework import routers
 from resolwe.api_urls import api_router as resolwe_router
@@ -50,5 +52,5 @@ urlpatterns = [  # pylint: disable=invalid-name
     # reporting errors when running processes.
     url(r'^api-resolwe/', include(resolwe_router.urls, namespace='resolwe-api')),
     url(r'^api/', include(api_router.urls + search_router.urls + resolwe_router.urls, namespace='resolwebio-api')),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
