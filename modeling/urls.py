@@ -51,6 +51,7 @@ urlpatterns = [  # pylint: disable=invalid-name
     # XXX: Temporary fix to work with Resolwe 2.0.0, which requires 'resolwe-api' namespace to be available when
     # reporting errors when running processes.
     url(r'^api-resolwe/', include(resolwe_router.urls, namespace='resolwe-api')),
+    url(r'^rest-auth/', include('rest_auth.urls')),
     url(r'^api/', include(api_router.urls + search_router.urls + resolwe_router.urls, namespace='resolwebio-api')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

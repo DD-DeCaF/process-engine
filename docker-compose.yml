@@ -1,9 +1,9 @@
 version: "2.1"
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    extends:
+      file: common.yml
+      service: common
     command: ["./wait-for-db.sh",
       "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
       "${RESOLWE_POSTGRESQL_PORT:-5432}",
@@ -12,30 +12,60 @@ services:
       "${RESOLWE_ES_HOST:-elasticsearch}",
       "${RESOLWE_ES_PORT:-9200}",
       "./runserver.sh"]
-    ports:
-      - "${PROCESS_ENGINE_PORT:-7600}:8000"
     links:
       - redis
       - postgresql
       - elasticsearch
-    environment:
-      - RESOLWE_DJANGO_DEBUG=${RESOLWE_DJANGO_DEBUG:-1}
-      - RESOLWE_REDIS_HOST=${RESOLWE_REDIS_HOST:-redis}
-      - RESOLWE_REDIS_PORT=${RESOLWE_REDIS_PORT:-6379}
-      - RESOLWE_REDIS_DB=${RESOLWE_REDIS_DB:-0}
-      - RESOLWE_POSTGRESQL_NAME=${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}
-      - RESOLWE_POSTGRESQL_USER=${RESOLWE_POSTGRESQL_USER:-resolwe}
-      - RESOLWE_POSTGRESQL_HOST=${RESOLWE_POSTGRESQL_HOST:-postgresql}
-      - RESOLWE_POSTGRESQL_PORT=${RESOLWE_POSTGRESQL_PORT:-5432}
-      - RESOLWE_ES_HOST=${RESOLWE_ES_HOST:-elasticsearch}
-      - RESOLWE_ES_PORT=${RESOLWE_ES_PORT:-9200}
-      - RESOLWE_SECRET_KEY=${RESOLWE_SECRET_KEY:-1}
-      - SUPERUSER_USERNAME=${SUPERUSER_USERNAME:-admin}
-      - SUPERUSER_EMAIL=${SUPERUSER_EMAIL:-admin@test.com}
-      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-admin1test}
+    ports:
+      - "${PROCESS_ENGINE_PORT:-7600}:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     privileged: true
+  observers:
+    extends:
+      file: common.yml
+      service: common
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: ["./wait-for-db.sh",
+      "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
+      "${RESOLWE_POSTGRESQL_PORT:-5432}",
+      "${RESOLWE_POSTGRESQL_USER:-resolwe}",
+      "${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}",
+      "${RESOLWE_ES_HOST:-elasticsearch}",
+      "${RESOLWE_ES_PORT:-9200}", "python manage.py runobservers"]
+    ports:
+      - "${PROCESS_ENGINE_OBSERVERS_PORT:-7700}:9432"
+  listener:
+    extends:
+      file: common.yml
+      service: common
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: ["./wait-for-db.sh",
+      "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
+      "${RESOLWE_POSTGRESQL_PORT:-5432}",
+      "${RESOLWE_POSTGRESQL_USER:-resolwe}",
+      "${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}",
+      "${RESOLWE_ES_HOST:-elasticsearch}",
+      "${RESOLWE_ES_PORT:-9200}", "python manage.py runlistener"]
+  celery:
+    extends:
+      file: common.yml
+      service: common
+    user: nobody
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: "celery -A modeling worker --queues=ordinary,hipri --loglevel=info"
   postgresql:
     image: postgres:9.4
     environment:

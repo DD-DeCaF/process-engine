@@ -17,6 +17,10 @@ from distutils.util import strtobool  # pylint: disable=import-error,no-name-in-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+BROKER_URL = 'redis://{}:{}/0'.format(
+    os.environ['RESOLWE_REDIS_HOST'],
+    os.environ['RESOLWE_REDIS_PORT'],
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -27,25 +31,33 @@ SECRET_KEY = os.environ['RESOLWE_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ['RESOLWE_DJANGO_DEBUG'])
 
-
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'channels',
+    'raven.contrib.django.raven_compat',
+
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_reactive',
+    'rest_auth',
     'guardian',
     'mathfilters',
     'versionfield',
+    'corsheaders',
+    'simple_history',
+    'channels',
+    'django_filters',
 
     'resolwe',
     'resolwe.permissions',
     'resolwe.flow',
-    'resolwe.elastic',
+    # 'resolwe.elastic',
     'resolwe.toolkit',
-    'resolwe.test_helpers',
 
     'resolwe_bio',
     'resolwe_bio.kb',
