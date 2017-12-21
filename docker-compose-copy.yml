@@ -1,0 +1,83 @@
+version: "2.1"
+services:
+  web:
+    extends:
+      file: common.yml
+      service: common
+    command: ["./wait-for-db.sh",
+      "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
+      "${RESOLWE_POSTGRESQL_PORT:-5432}",
+      "${RESOLWE_POSTGRESQL_USER:-resolwe}",
+      "${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}",
+      "${RESOLWE_ES_HOST:-elasticsearch}",
+      "${RESOLWE_ES_PORT:-9200}",
+      "./runserver.sh"]
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+    ports:
+      - "${PROCESS_ENGINE_PORT:-7600}:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+  observers:
+    extends:
+      file: common.yml
+      service: common
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: ["./wait-for-db.sh",
+      "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
+      "${RESOLWE_POSTGRESQL_PORT:-5432}",
+      "${RESOLWE_POSTGRESQL_USER:-resolwe}",
+      "${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}",
+      "${RESOLWE_ES_HOST:-elasticsearch}",
+      "${RESOLWE_ES_PORT:-9200}", "python manage.py runobservers"]
+    ports:
+      - "${PROCESS_ENGINE_OBSERVERS_PORT:-7700}:9432"
+  listener:
+    extends:
+      file: common.yml
+      service: common
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: ["./wait-for-db.sh",
+      "${RESOLWE_POSTGRESQL_HOST:-postgresql}",
+      "${RESOLWE_POSTGRESQL_PORT:-5432}",
+      "${RESOLWE_POSTGRESQL_USER:-resolwe}",
+      "${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}",
+      "${RESOLWE_ES_HOST:-elasticsearch}",
+      "${RESOLWE_ES_PORT:-9200}", "python manage.py runlistener"]
+  celery:
+    extends:
+      file: common.yml
+      service: common
+    user: nobody
+    links:
+      - redis
+      - postgresql
+      - elasticsearch
+      - web
+    command: "celery -A modeling worker --queues=ordinary,hipri --loglevel=info"
+  postgresql:
+    image: postgres:9.4
+    environment:
+      - POSTGRES_USER=${RESOLWE_POSTGRESQL_USER:-resolwe}
+      - POSTGRES_DB=${RESOLWE_POSTGRESQL_NAME:-resolwe-bio}
+    ports:
+      - "${RESOLWE_POSTGRESQL_PORT:-5432}"
+  redis:
+    image: redis:3.2
+    ports:
+      - "${RESOLWE_REDIS_PORT:-6379}"
+  elasticsearch:
+    image: elasticsearch:2.4
+    ports:
+      - "${RESOLWE_ES_PORT:-9200}"

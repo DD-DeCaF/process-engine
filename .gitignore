@@ -8,3 +8,6 @@
 .ipynb_checkpoints/
 .cache/
 venv/
+data/data/*
+data/runtime/*
+data/uploadg/*
